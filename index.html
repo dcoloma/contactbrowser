@@ -107,6 +107,7 @@ function createLoginCallback()
 }
 
 function nologin(){
+  console.log("nologin")
   logeado = true;
         myUserId = "111206999556797102112";
 
@@ -151,12 +152,23 @@ function fbContactChanged(childSnapshot, prevChildName) {
 }
 
 function contactAdded(childSnapshot, prevChildName) {
-  if (childSnapshot.val().id == undefined)
+  console.log("Contacto added " + childSnapshot.val())
+  console.log(childSnapshot.val())
+  if (childSnapshot.val().id != undefined)
   {
     var item = document.getElementById(childSnapshot.val().id);
-    if (item != null) { // should happen
+    if (item == null) { // should happen
       addItem(childSnapshot.val().id, childSnapshot.val().name);
     } 
+  }
+  else{
+    if (childSnapshot.val().contact != undefined){
+      contacto = JSON.parse(childSnapshot.val().contact)
+      var item = document.getElementById(contacto.id);
+      if (item == null) { // should happen
+        addItem(contacto.id, contacto.name);
+      } 
+    }
   }
 
 }
