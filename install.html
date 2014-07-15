@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Install Concerts</title>
+  <style>
+form { width: 100%; height: 100%; }
+
+button { width: 200px; height: 200px; }
+  </style>
+</head>
+<body>
+
+<form id="install"><button>Install Concerts</button></form>
+
+<script>
+
+function install() {
+    var request = navigator.mozApps.install( "http://dcoloma.github.io/concerts/manifest.webapp");
+    request.onerror = function() { alert("Something went wrong:" + this.error.message); }
+    return false;
+}
+
+document.getElementById('install').onsubmit = install;
+
+</script>
+
+</body>
+</html>

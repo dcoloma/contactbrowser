@@ -1,0 +1,201 @@
+html {
+  font-size: 100%;
+  color: white;
+  background-color: blakc;
+
+}
+
+/*
+ * Addresses margins handled incorrectly in IE6/7
+ */
+body {
+  margin: 0;
+  background: #1d1d1d;
+  color: black;
+  font-family: sans-serif;
+}
+
+.versionbox{
+  color: white;
+  font-family: sans-serif;
+  font-size: 0.7rem;
+  text-align: center;
+  color: white;
+  margin: 0.3rem;
+  height: 3rem;
+  width: 5rem;
+  background-color: orange;
+  border-radius: 0.6rem;  
+  display: inline-block;
+}
+
+.title{
+  color: black;
+  width: 9rem;
+  font-family: sans-serif;
+  font-size: 0.9rem;
+  text-align: center;
+  text-decoration: bold;
+  margin: 0.3rem;
+  height: 2rem;
+  width: 9rem;
+  background-color: orange;
+  border-radius: 0.6rem;  
+  display: inline-block;
+  padding: 0rem;
+  margin: 0.1rem;
+  line-height: 2rem;
+}
+
+.bug-count{
+  font-size: 2rem;
+  text-align: center;
+  color: white;
+}
+
+.bugbox{
+  font-family: sans-serif;
+  border-radius: 1.2rem;
+  width: 6rem;
+  height:6rem;
+  font-size: 1rem;
+  text-align: center;
+  display: inline-block;
+  margin: 0.1rem;
+}
+
+.bugbox-title {
+  font-family: sans-serif;
+  font-size: 0.7rem;
+  text-align: center;;
+  color: white;
+  margin: 0.4rem;
+  height: 1rem;
+  width: 5rem;
+}
+
+.bug-count{
+  font-size: 2rem;
+  text-align: center;
+  color: white;
+  margin: 0rem;
+  padding: 0.8rem;
+  height: 2.2rem;
+  margin-bottom: 0.1rem;
+}
+
+.badge{
+  font-size: 0.5rem;
+  color: white;
+  position: relative;
+  bottom: 0.3rem;
+  margin: 0rem;
+}
+
+.font-color-white{
+  color:white;
+}
+
+.font-color-blue{
+  color: #2d89ef;
+}
+
+.boximage{
+  width: 4rem;
+  height: 4rem;
+  position: relative;
+  top: 0rem;
+}
+
+.contactlist {
+   width: 9rem;
+   padding: 0rem;
+   font-size: 0.5rem;
+   border-radius: 0.5rem;
+   background-color: white;
+   margin: 0.1rem;
+   height: 10rem;
+   color: #2b5797;
+   text-overflow: ellipsis;
+   display: inline-block;
+   white-space: nowrap;
+   overflow: hidden;
+}
+
+.li{
+word-wrap: normal;
+}
+
+
+.bg-color-blue {
+  background-color: #2d89ef !important;
+}
+.bg-color-blueLight {
+  background-color: #eff4ff !important;
+}
+.bg-color-blueDark {
+  background-color: #2b5797 !important;
+}
+.bg-color-blueFxos {
+  background-color: #00AACC !important;
+}
+.bg-color-blueFxoslight{
+  background-color: #B2F2FF !important;
+}
+.bg-color-green {
+  background-color: #00a300 !important;
+}
+.bg-color-greenLight {
+  background-color: #99b433 !important;
+}
+.bg-color-greenDark {
+  background-color: #1e7145 !important;
+}
+.bg-color-greenFxos {
+  background-color: #4B780A !important;
+}
+.bg-color-greenFxoslight{
+  background-color: #5F9B0A !important;
+}
+.bg-color-red {
+  background-color: #b91d47 !important;
+}
+.bg-color-redDark {
+  background-color: #820000 !important;
+}
+.bg-color-redFxos {
+  background-color: #B90000 !important;
+}
+.bg-color-yellow {
+  background-color: #ffc40d !important;
+}
+.bg-color-orange {
+  background-color: #e3a21a !important;
+}
+.bg-color-orangeDark {
+  background-color: #da532c !important;
+}
+.bg-color-pink {
+  background-color: #9f00a7 !important;
+}
+.bg-color-pinkDark {
+  background-color: #7e38AF !important;
+}
+.bg-color-pinkFxos {
+  background-color: #7e3878 !important;
+}
+.bg-color-purple {
+  background-color: #603cba !important;
+}
+.bg-color-darken {
+  background-color: #1d1d1d !important;
+}
+.bg-color-lighten {
+  background-color: #d5e7ec !important;
+}
+.bg-color-white {
+  background-color: #ffffff !important;
+}
+.bg-color-grayDark {
+  background-color: #525252 !important;
+}
