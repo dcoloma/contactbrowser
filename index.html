@@ -146,7 +146,7 @@ function fbContactChanged(childSnapshot, prevChildName) {
   {
     var item = document.getElementById(childSnapshot.val().id);
     if (item != null) { // should happen
-      item.innerHTML = "<p class='listItem listTopLine'>Nombre: " + childSnapshot.val().name + "</p><p> ID:" + childSnapshot.val().id + "</p>";
+      item.innerHTML = "<p class='listItem listTopLine'>Nombre: " + childSnapshot.val().name + "</p><p> ID:" + childSnapshot.val().id + "</p><p><a href=javascript:deleteItem('" + childSnapshot.val().id +"')>Delete</a></p>";
     } 
   }
 }
@@ -183,11 +183,20 @@ function contactAdded(childSnapshot, prevChildName) {
     eLista = document.getElementById("lista");
     var listItem = document.createElement('li');
     listItem.setAttribute("id", id);
-    text ="<p class='listItem listTopLine'>Nombre: " + name + "</p><p> ID:" + id + "</p>";
+    text ="<p class='listItem listTopLine'>Nombre: " + name + "</p><p> ID:" + id + "</p><p><a href=javascript:deleteItem('" + id +"')>Delete</a></p>";
     listItem.innerHTML = text;
     eLista.appendChild(listItem);
   }
 
+  function deleteItem(id){
+    var element = document.getElementById(id);
+    if (element != null) 
+    {
+      element.parentNode.removeChild(element);
+      var fb = new Firebase(baseURL + "/users/" + myUserId + "/contacts/" + id);
+      fb.remove();
+    }
+  }
 
 </script>
 
@@ -198,7 +207,7 @@ function contactAdded(childSnapshot, prevChildName) {
 
 <section class="skin-organic" role="region" id="main-page">
   <header class="fixed" id="main-page-header">
-    <a href="javascript:nologin()"><span class="icon icon-menu">login</span></a>
+    <!--<a href="javascript:nologin()"><span class="icon icon-menu">login</span></a>-->
     <h1 data-l10n-id="appName">Contact List</h1>
   </header>
   <article class="content scrollable header" id="main-page-artist-view">

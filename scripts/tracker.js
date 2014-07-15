@@ -126,10 +126,10 @@ function fbContactsRead(snapshot) {
           console.log("fbContactsRead: Local  " + JSON.stringify(e.target.result[0]));
           console.log("fbContactsRead: Remote " + childSnapshot.val().contact);
           if (sync) {
-            e.target.result[0].name = childSnapshot.val().name;
+            //e.target.result[0].name = childSnapshot.val().name;
             //request = window.navigator.mozContacts.save(new mozContact(JSON.parse(childSnapshot.val().contact)));
             saveoperation = window.navigator.mozContacts.save(e.target.result[0]);
-            saveoperation.onsuccess() = function(){
+            saveoperation.onsuccess = function(){
               console.log("fbContactsRead: Local ID after updating the contact is " + e.target.result[0].id);
             }
           }
@@ -157,7 +157,7 @@ function fbContactsRead(snapshot) {
     request.onerror = function(e) {
       console.log("fbContacsRead: The FB contact is not in the Local DB");
       saveoperation = window.navigator.mozContacts.save(new mozContact(JSON.parse(childSnapshot.val().contact)));
-      saveoperation.onsuccess() = function(){
+      saveoperation.onsuccess = function(){
         console.log("fbContactsRead: Local ID after updating the contact is " + e.target.result[0].id);
         addItemToContactList("local-"+e.target.result[0].id, e.target.result[0].name, localPeople);
       }
@@ -231,7 +231,7 @@ function fbContactChanged(childSnapshot, prevChildName) {
             if (sync)
             {
               console.log("hay que probar esto")
-              e.target.result[0].name = childSnapshot.val().name;
+              //e.target.result[0].name = childSnapshot.val().name;
               request = window.navigator.mozContacts.save(new mozContact(JSON.parse(childSnapshot.val().contact)));
               //request = window.navigator.mozContacts.save(e.target.result[0]);
             }
@@ -254,30 +254,42 @@ function contactAdded(childSnapshot, prevChildName) {
   console.log(childSnapshot.val());
   var contact = JSON.parse(childSnapshot.val().contact)
 
+  if (childSnapshot.val().contact != undefined){
+    localId   == contact.id; 
+    localName == contact.name; 
+  }
+  else{
+    if (childSnapshot.val().id != undefined)
+      localId = childSnapshot.val().id;
+    if (childSnapshot.val().name != undefined)
+      locaName = childSnapshot.val().name;
+  }
+
+
   // Add to remote list
-  addItemToContactList(childSnapshot.val().id, childSnapshot.val().name, remotePeople)
+  addItemToContactList(localId, localName, remotePeople)
 
   // Now let's check if contact exists
   var options = {
       filterBy: ['id'],
       filterOp: 'equals',
-      filterValue: childSnapshot.val().id 
+      filterValue: localId 
   };
   var request = navigator.mozContacts.find(options);
 
   if (sync){
     request.onsuccess = function(e) {
       if (e.target.result[0] != undefined) {
-        console.log("contactAdded: The FB contact is already in the local DB " + e.target.result[0] + " " + childSnapshot.val().id);
+        console.log("contactAdded: The FB contact is already in the local DB " + e.target.result[0] + " " + localId);
         if (JSON.stringify(e.target.result[0]) == childSnapshot.val().contact ) {
           console.log("contactAdded: Local and FB contacts are exactly the same");
         } else {
           console.log("contactAdded: Both contacts are different");
           console.log("contactAdded: Local  " + JSON.stringify(e.target.result[0]));
           console.log("contactAdded: Remote " + childSnapshot.val().contact);
-          e.target.result[0].name = childSnapshot.val().name;
+          e.target.result[0].name = localName;
           saveoperation = window.navigator.mozContacts.save(e.target.result[0]);
-          saveoperation.onsuccess() = function(){
+          saveoperation.onsuccess = function(){
             console.log("fbContactsRead: Local ID after updating the contact is " + e.target.result[0].id);
             // Deberíamos borrar el antiguo tanto de FB como local?
           }
@@ -285,7 +297,7 @@ function contactAdded(childSnapshot, prevChildName) {
       } else {
         console.log("fbContacsRead: The FB contact is not in the Local DB");
         myContact = new mozContact(JSON.parse(childSnapshot.val().contact))
-        var oldId = childSnapshot.val().id;
+        var oldId = localId;
         console.log("fbContacsRead: The old ID is " + oldId);
         saveoperation = window.navigator.mozContacts.save(myContact);
         saveoperation.onsuccess = function(){
