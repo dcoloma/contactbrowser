@@ -2,15 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-  <title>Concert Guide</title>
+  <title>Contact List</title>
 
-  <!--<script defer src="scripts/l10n.js" charset="utf-8"></script>
-  <link rel="resource" type="application/l10n" href="locales/locales.ini" />-->
     <link href="style/base.css" rel="stylesheet" type="text/css">
 
   <link href="bb/toolbars.css" rel="stylesheet" type="text/css">
   <link href="bb/tabs.css" rel="stylesheet" type="text/css">
-  <script type="text/javascript" charset="utf-8" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 
   <link href="bb/icons/styles/action_icons.css" rel="stylesheet" type="text/css">
   <link href="bb/icons/styles/settings_icons.css" rel="stylesheet" type="text/css">
@@ -29,33 +26,7 @@
   <script type='text/javascript' src='scripts/firebase-debug.js'></script>
   <script type='text/javascript' src='scripts/firebase-simple-login.js'></script>
 
-  <script src="scripts/ajax.js"></script>
-  <script src="scripts/infinite-scroll.js"></script>
-
 <script>
-
-  // Pagination Control
-  var page = 1; // current page for last.fm requests
-  var newPage = 1;  // next page for last.fm reqeusts
-  var totalPages = 1; // total number of pages in last.fm answer
-  var lastPage = false; // are we on the last page
-
-  // Global Attributes  
-  var userLat = 41.64; // user's current latitude or null if they searched by city
-  var userLng = -0.88; // user's current longitude or null if they searched by city
-  var radio=25; // radio de búsqueda en km
-  var amount=25;
-  var artist=""
-  var list = "";
-  var city = "";
-  var pages; // pages to be displayed for gig details
-  var tweets;
-  var mails;
-  var smss;
-  var lastPosition;
-  var successfulSearch = false;
-
-
 
 var baseURL = "https://ffosbackup.firebaseio.com/";
 
@@ -64,6 +35,8 @@ var sync = false;
 var myUserId;
 var userfb;
 var contactsfb;
+var contactList = [];
+
 
   function login()
   {
@@ -125,8 +98,9 @@ function fbContactsRead(snapshot) {
   snapshot.forEach(function(childSnapshot) {
     console.log("fbContactsRead: FB Item with ID " + childSnapshot.val().id + " and...: ")
     console.log(childSnapshot.val());
+    contactList[childSnapshot.val().id] = childSnapshot.val().contact;
     // Show, if available DOM element modify innerHTML if not, add new one
-    addItem(childSnapshot.val().id, childSnapshot.val().name)
+    addItem(childSnapshot.val().id, JSON.parse(childSnapshot.val().contact));
   });
   contactsfb.on('child_removed', contactRemoved);
   contactsfb.on('child_added', contactAdded);
@@ -135,6 +109,7 @@ function fbContactsRead(snapshot) {
 
 function contactRemoved(oldChildSnapshot) {
   var element = document.getElementById(oldChildSnapshot.val().id);
+  contactList[oldChildSnapshot.val().id] = null; 
   if (element != null) 
   {
     element.parentNode.removeChild(element);
@@ -142,11 +117,13 @@ function contactRemoved(oldChildSnapshot) {
 }
 
 function fbContactChanged(childSnapshot, prevChildName) {
+  console.log("Changed " + childSnapshot.val().id + " " + childSnapshot.val().contact);
   if (childSnapshot.val().id != undefined)
   {
     var item = document.getElementById(childSnapshot.val().id);
+    contactList[childSnapshot.val().id] = childSnapshot.val().contact;
     if (item != null) { // should happen
-      item.innerHTML = "<p class='listItem listTopLine'>Nombre: " + childSnapshot.val().name + "</p><p> ID:" + childSnapshot.val().id + "</p><p><a href=javascript:deleteItem('" + childSnapshot.val().id +"')>Delete</a></p>";
+      item.innerHTML = getStringForContact(JSON.parse(childSnapshot.val().contact))
     } 
   }
 }
@@ -154,11 +131,12 @@ function fbContactChanged(childSnapshot, prevChildName) {
 function contactAdded(childSnapshot, prevChildName) {
   console.log("Contacto added " + childSnapshot.val())
   console.log(childSnapshot.val())
+  contactList[childSnapshot.val().id] = childSnapshot.val().contact;
   if (childSnapshot.val().id != undefined)
   {
     var item = document.getElementById(childSnapshot.val().id);
     if (item == null) { // should happen
-      addItem(childSnapshot.val().id, childSnapshot.val().name);
+      addItem(childSnapshot.val().id, JSON.parse(childSnapshot.val().contact));
     } 
   }
   else{
@@ -166,25 +144,21 @@ function contactAdded(childSnapshot, prevChildName) {
       contacto = JSON.parse(childSnapshot.val().contact)
       var item = document.getElementById(contacto.id);
       if (item == null) { // should happen
-        addItem(contacto.id, contacto.name);
+        addItem(contacto.id, contacto);
       } 
     }
   }
-
 }
-
-
 
   // Shows the events, to be called when the events have been retrieved
   // the input argument (data) contains the json representation of the
   // gigs received in the XHR
-  function addItem(id, name)
+  function addItem(id, contact)
   {
     eLista = document.getElementById("lista");
     var listItem = document.createElement('li');
     listItem.setAttribute("id", id);
-    text ="<p class='listItem listTopLine'>Nombre: " + name + "</p><p> ID:" + id + "</p><p><a href=javascript:deleteItem('" + id +"')>Delete</a></p>";
-    listItem.innerHTML = text;
+    listItem.innerHTML = getStringForContact(contact);
     eLista.appendChild(listItem);
   }
 
@@ -197,6 +171,23 @@ function contactAdded(childSnapshot, prevChildName) {
       fb.remove();
     }
   }
+
+
+  function getStringForContact(contact){
+    console.log("CONTACTO ");
+    console.log(contact);
+    if ((contact.email) && (contact.email[0] != null)) {
+      emailstr = "<p>E-mail: " + contact.email[0].value+"</p>"; 
+    } else {
+      emailstr = "<p>No E-mail addresses</p>";
+    }
+    if ((contact.tel) && (contact.tel[0] != null)) {
+      phonestr = "<p>Phone Number: " + contact.tel[0].value+"</p>" ;
+    } else {
+      phonestr = "<p>No Phone Number</p>";
+    }
+    return "<p class='listItem listTopLine'>Name: " + contact.name + "</p>" + emailstr + phonestr; 
+ }
 
 </script>
 
