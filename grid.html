@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<link href="style/base.css" rel="stylesheet" type="text/css">
+
+
+  <title>FFOS Virtualization</title>
+
+    <link href="style/base.css" rel="stylesheet" type="text/css">
+
+  <link href="bb/toolbars.css" rel="stylesheet" type="text/css">
+  <link href="bb/tabs.css" rel="stylesheet" type="text/css">
+
+  <link href="bb/icons/styles/action_icons.css" rel="stylesheet" type="text/css">
+  <link href="bb/icons/styles/settings_icons.css" rel="stylesheet" type="text/css">
+  <link href="bb/icons/styles/comms_icons.css" rel="stylesheet" type="text/css">
+  <link href="bb/buttons.css" rel="stylesheet" type="text/css">
+  <link href="bb/icons/styles/media_icons.css" rel="stylesheet" type="text/css">
+  <link href="bb/icons/styles/settings_icons.css" rel="stylesheet" type="text/css">
+  <link href="bb/action_menu.css" rel="stylesheet" type="text/css">
+  <link href="bb/input_areas.css" rel="stylesheet" type="text/css">
+  <link href="bb/headers.css" rel="stylesheet" type="text/css">
+  <link href="bb/lists.css" rel="stylesheet" type="text/css">
+  <link href="bb/confirm.css" rel="stylesheet" type="text/css">
+  <link href="bb/status.css" rel="stylesheet" type="text/css">
+
+  <!--<link href="bb/fbtest.css" rel="stylesheet">-->
+  <script type='text/javascript' src='scripts/firebase-debug.js'></script>
+  <script type='text/javascript' src='scripts/firebase-simple-login.js'></script>
+
+<script>
+
+var baseURL = "https://ffosbackup.firebaseio.com/";
+
+var logeado = false;
+var sync = false;
+var myUserId;
+var userfb;
+var contactsfb;
+var threadsfb;
+var contactList = [];
+var threadList = [];
+var debug = false;
+var contactsI;
+var smsI;
+var gridI;
+var threadI;
+var threadDetailI;
+var threadHeaderI;
+var threadDetailHeaderI;
+
+function init(){
+  gridI = document.getElementById("grid");
+  contactsI = document.getElementById("contacts");
+  smsI = document.getElementById("sms");
+  threadI = document.getElementById("list-thread");
+  threadDetailI = document.getElementById("list-thread-detail");
+  threadHeaderI = document.getElementById("main-page-header-thread");
+  threadDetailHeaderI = document.getElementById("main-page-header-sms");
+
+  show(gridI);
+  hide(contactsI);
+  hide(smsI);
+  console.log("asss show only grid");
+  if (debug == true)
+  	nologin();
+  else
+  	login();
+}
+
+  function login()
+  {
+    console.log("login: BEGIN METHOD")
+    fbref = new Firebase(baseURL);
+    var auth = new FirebaseSimpleLogin(fbref, createLoginCallback())
+    auth.login('google');
+    console.log("login: END METHOD")
+  }
+
+  // Closure for adding listeners to every node
+function createLoginCallback()
+{
+  return function(error, user){
+    console.log("loginCallback: BEGIN METHOD")
+    if (error) {
+      console.log("loginCallback: *** ERROR *** Login Failed! " + error + " ****");
+    } else if (user) {// user authenticated with Firebase
+      console.log('loginCallback: *** SUCCESSS *** User Email: ' + user.email + ' Provider: ' + user.provider + " ID: " + user.id);
+      if (logeado == false) {
+        // inits
+        logeado = true;
+        myUserId = user.id;
+        sync=true;
+        userfb = new Firebase(baseURL + "/users/" + user.id);
+        contactsfb = new Firebase(baseURL + "/users/" + user.id + "/contacts")
+        threadsfb = new Firebase(baseURL + "/users/" + user.id + "/threads")
+
+        // Copy basic user data to FB
+        var childRef = userfb.child('/id');
+        childRef.set(user.id);
+        childRef = userfb.child('/email');
+        childRef.set(user.email);
+
+        // Read once all Firebase data
+        contactsfb.once('value', fbContactsRead);
+        threadsfb.once('value', fbThreadsRead);
+      }
+    } else {
+      console.log("*** USER logged out");
+    } 
+  }
+}
+
+function nologin(){
+  console.log("nologin")
+  logeado = true;
+        myUserId = "111206999556797102112";
+
+        sync=true;
+        userfb = new Firebase(baseURL + "/users/" + myUserId);
+        contactsfb = new Firebase(baseURL + "/users/" + myUserId+ "/contacts")
+        threadsfb = new Firebase(baseURL + "/users/" + myUserId + "/threads")
+
+        // Read once all Firebase data
+        contactsfb.once('value', fbContactsRead);
+        threadsfb.once('value', fbThreadsRead);
+}
+
+
+function fbContactsRead(snapshot) {
+  console.log("fbContactsRead: BEGIN METHOD AKA ONCE")
+  snapshot.forEach(function(childSnapshot) {
+    console.log("fbContactsRead: FB Item with ID " + childSnapshot.val().id + " and...: ")
+    console.log(childSnapshot.val());
+    contactList[childSnapshot.val().id] = childSnapshot.val().contact;
+    // Show, if available DOM element modify innerHTML if not, add new one
+    addContactItem(childSnapshot.val().id, JSON.parse(childSnapshot.val().contact));
+  });
+  contactsfb.on('child_removed', contactRemoved);
+  contactsfb.on('child_added', contactAdded);
+  contactsfb.on('child_changed', fbContactChanged);
+}
+
+function contactRemoved(oldChildSnapshot) {
+  var element = document.getElementById(oldChildSnapshot.val().id);
+  contactList[oldChildSnapshot.val().id] = null; 
+  if (element != null) 
+  {
+    element.parentNode.removeChild(element);
+  }
+}
+
+function fbContactChanged(childSnapshot, prevChildName) {
+  console.log("Changed " + childSnapshot.val().id + " " + childSnapshot.val().contact);
+  if (childSnapshot.val().id != undefined)
+  {
+    var item = document.getElementById(childSnapshot.val().id);
+    contactList[childSnapshot.val().id] = childSnapshot.val().contact;
+    if (item != null) { // should happen
+      item.innerHTML = getStringForContact(JSON.parse(childSnapshot.val().contact))
+    } 
+  }
+}
+
+function contactAdded(childSnapshot, prevChildName) {
+  console.log("Contacto added " + childSnapshot.val())
+  console.log(childSnapshot.val())
+  contactList[childSnapshot.val().id] = childSnapshot.val().contact;
+  if (childSnapshot.val().id != undefined)
+  {
+    var item = document.getElementById(childSnapshot.val().id);
+    if (item == null) { // should happen
+      addContactItem(childSnapshot.val().id, JSON.parse(childSnapshot.val().contact));
+    } 
+  }
+  else{
+    if (childSnapshot.val().contact != undefined){
+      contacto = JSON.parse(childSnapshot.val().contact)
+      var item = document.getElementById(contacto.id);
+      if (item == null) { // should happen
+        addContactItem(contacto.id, contacto);
+      } 
+    }
+  }
+}
+
+  // Shows the events, to be called when the events have been retrieved
+  // the input argument (data) contains the json representation of the
+  // gigs received in the XHR
+  function addContactItem(id, contact)
+  {
+    eLista = document.getElementById("list-contacts");
+    var listItem = document.createElement('li');
+    listItem.setAttribute("id", id);
+    listItem.innerHTML = getStringForContact(contact);
+    eLista.appendChild(listItem);
+  }
+
+  function deleteItem(id){
+    var element = document.getElementById(id);
+    if (element != null) 
+    {
+      element.parentNode.removeChild(element);
+      var fb = new Firebase(baseURL + "/users/" + myUserId + "/contacts/" + id);
+      fb.remove();
+    }
+  }
+
+  // Shows the events, to be called when the events have been retrieved
+  // the input argument (data) contains the json representation of the
+  // gigs received in the XHR
+  function addThreadItem(thread)
+  {
+    eLista = document.getElementById("list-thread");
+    var listItem = document.createElement('li');
+    listItem.setAttribute("id", "thread"+thread.id);
+    listItem.innerHTML = getStringForThread(thread);
+    eLista.appendChild(listItem);
+  }
+
+  function addSmsThreadItem(message)
+  {
+    eLista = document.getElementById("list-thread-detail");
+    var listItem = document.createElement('li');
+    listItem.setAttribute("id", "thread-sms-"+message.id);
+    listItem.innerHTML = getStringForSms(message);
+    eLista.appendChild(listItem);
+  }
+
+///////////////////////////////
+
+function fbThreadsRead(snapshot) {
+  console.log("fbThreadsRead: BEGIN METHOD AKA ONCE")
+  snapshot.forEach(function(childSnapshot) {
+    console.log("fbThreadsRead: FB Item with ID " + childSnapshot.val().id + " and...: ")
+    console.log(childSnapshot.val());
+
+    var thread = {};
+
+    thread.id = childSnapshot.val().id;
+    thread.body = childSnapshot.val().body;
+    thread.participants = childSnapshot.val().participants[0];
+    thread.messages = childSnapshot.val().messages;
+
+    threadList[thread.id] = thread;
+    // Show, if available DOM element modify innerHTML if not, add new one
+    addThreadItem(thread);
+  });
+  //contactsfb.on('child_removed', contactRemoved);
+  //contactsfb.on('child_added', contactAdded);
+  //contactsfb.on('child_changed', fbContactChanged);
+}
+
+/*function contactRemoved(oldChildSnapshot) {
+  var element = document.getElementById(oldChildSnapshot.val().id);
+  contactList[oldChildSnapshot.val().id] = null; 
+  if (element != null) 
+  {
+    element.parentNode.removeChild(element);
+  }
+}
+
+function fbContactChanged(childSnapshot, prevChildName) {
+  console.log("Changed " + childSnapshot.val().id + " " + childSnapshot.val().contact);
+  if (childSnapshot.val().id != undefined)
+  {
+    var item = document.getElementById(childSnapshot.val().id);
+    contactList[childSnapshot.val().id] = childSnapshot.val().contact;
+    if (item != null) { // should happen
+      item.innerHTML = getStringForContact(JSON.parse(childSnapshot.val().contact))
+    } 
+  }
+}
+
+function contactAdded(childSnapshot, prevChildName) {
+  console.log("Contacto added " + childSnapshot.val())
+  console.log(childSnapshot.val())
+  contactList[childSnapshot.val().id] = childSnapshot.val().contact;
+ if (childSnapshot.val().id != undefined)
+  {
+    var item = document.getElementById(childSnapshot.val().id);
+    if (item == null) { // should happen
+      addItem(childSnapshot.val().id, JSON.parse(childSnapshot.val().contact));
+    } 
+  }
+  else{
+    if (childSnapshot.val().contact != undefined){
+      contacto = JSON.parse(childSnapshot.val().contact)
+      var item = document.getElementById(contacto.id);
+      if (item == null) { // should happen
+        addItem(contacto.id, contacto);
+      } 
+    }
+  }
+}*/
+
+
+
+///////////////////////////////
+  function getStringForContact(contact){
+    console.log("CONTACTO ");
+    console.log(contact);
+    if ((contact.email) && (contact.email[0] != null)) {
+      emailstr = "<p>E-mail: " + contact.email[0].value+"</p>"; 
+    } else {
+      emailstr = "<p>No E-mail addresses</p>";
+    }
+    if ((contact.tel) && (contact.tel[0] != null)) {
+      phonestr = "<p>Phone Number: " + contact.tel[0].value+"</p>" ;
+    } else {
+      phonestr = "<p>No Phone Number</p>";
+    }
+    return "<p class='listItem listTopLine'>Name: " + contact.name + "</p>" + emailstr + phonestr; 
+ }
+
+ function getStringForThread(thread){
+    return "<a href='javascript:viewThread(" + thread.id + ")'><p class='listItem listTopLine'>With: " + thread.participants + "</p><p> Last Message:    " + thread.body + "</p><p>ID: " + thread.id + "</p></a>"; 
+ }
+
+ function getStringForSms(message){
+    console.log("SMS");
+    if (message.receiver != undefined) 
+      var typestr = "Outogoing Message" 
+    else
+      var typestr = "Incoming Message" 
+    idstr = "<p>ID " + message.id + "</p>"; 
+    return "<p class='listItem listTopLine'>" + typestr + "</p><p>Message:  " + message.body + "</p>" + idstr; 
+ }
+
+ function showContacts(){
+    show(this.contactsI);
+    hide(this.gridI);
+    hide(this.smsI);
+ }
+
+ function showSms(){
+    hide(this.contactsI);
+    hide(threadDetailI);
+    hide(this.gridI);
+    hide(threadDetailHeaderI);
+    show(this.smsI);
+    show(threadI);
+    show(threadHeaderI);
+ }
+
+ function showGrid(){
+    hide(this.contactsI);
+    hide(this.smsI);
+    show(this.gridI);
+ }
+
+ function show(element) {
+   console.log("showing " + element)
+   element.style.visibility="visible";
+   element.style.display="inline-block";    
+ }
+
+ function hide(element) {
+   console.log("hiding " + element)
+   element.style.visibility="hidden";
+   element.style.display="none";
+ }
+
+ function viewThread(id){
+   hide(threadI);
+   hide(threadHeaderI);
+   show(threadDetailI);
+   show(threadDetailHeaderI);
+
+   messages = threadList[id].messages;
+   document.getElementById("list-thread-detail").innerHTML = "";
+   for (var obj in messages) {
+     addSmsThreadItem(messages[obj]);
+   }
+}
+
+</script>
+
+
+</head>
+<body onload="init()">
+
+<div id="grid">
+   <a id='contacticon' href="javascript:showContacts()">
+   <div class='appbox bg-color-orangeDark'>
+   <h3 class='font-color-white'>Contacts</h3>
+   <img class='boximage' src='images/contacts_84.png'></img>
+   </div>
+   </a>
+   <a id="smsicon" href="javascript:showSms()">
+   <div class='appbox bg-color-orangeDark'>
+   <h3 class='font-color-white'>Messages</h3>
+   <img class='boximage' src='images/sms_84.png'></img>
+   </div>
+   </a>
+</div>
+
+<div id="contacts">
+<section class="skin-organic" role="region" id="main-page">
+  <header class="fixed" id="main-page-header">
+    <a href="javascript:showGrid()"><span class="icon icon-close">close</span></a>
+    <h1 data-l10n-id="appName">Contact List</h1>
+  </header>
+  <article class="content scrollable header">
+    <section data-type="list" class="main-page-event-list view-body article-list" >
+      <ul id="list-contacts"></ul>
+    </section>
+  </article>
+</section>
+</div>
+
+
+<div id="sms">
+<section class="skin-organic" role="region" id="main-page-sms">
+  <header class="fixed" id="main-page-header-thread">
+    <a href="javascript:showGrid()"><span class="icon icon-close">close</span></a>
+    <h1 data-l10n-id="appName">SMS</h1>
+  </header>
+  <article class="content scrollable header">
+    <section data-type="list" class="main-page-event-list view-body article-list"> 
+      <ul id="list-thread"></ul>
+    </section>
+  </article>
+</section>
+<section class="skin-organic" role="region" id="thread-page-sms">
+  <header class="fixed" id="main-page-header-sms">
+    <a href="javascript:showGrid()"><span class="icon icon-close">close</span></a>
+    <h1 data-l10n-id="appName">Thread</h1>
+  </header>
+  <article class="content scrollable header">
+    <section data-type="list" class="main-page-event-list view-body article-list">
+      <ul id="list-thread-detail"></ul>
+    </section>
+  </article>
+</section>
+</div>
+
+
+
+
+
+<body>

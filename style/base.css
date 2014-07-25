@@ -22,12 +22,35 @@ html {
 }
 
 body {
-  background-color: #FFFFFF;
+  background-color: #222222;
   font-size: 1.4rem;
   font-family: Arial,Helvetica,sans-serif;
   margin: 0;
   text-align: center;
 }
+
+
+.appbox{
+  color: white;
+  font-family: sans-serif;
+  font-size: 1rem;
+  text-align: center;
+  margin: 0.3rem;
+  height: 8rem;
+  width: 8rem;
+  background-color: #222222;
+  border-radius: 0.6rem;  
+  display: inline-block;
+}
+
+.boximage{
+  width: 4rem;
+  height: 4rem;
+  position: relative;
+  top: 0rem;
+}
+
+
 
 #main-page-location-view-button {
     position: absolute;
@@ -67,6 +90,7 @@ body {
 .main-page-event-list{
     position: absolute;
     top: 12rem;
+    text-align: left;
     width: 100%;
     left: 0rem;
     background-color: white;
