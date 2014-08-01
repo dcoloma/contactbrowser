@@ -14,15 +14,13 @@ button.comms-icon:before, a.comms-icon[role="button"]:before {
     top: 0.5rem;
 }
 
-
-
 html {
   height: 100%;
   font-size: 62.5%; /* Setting base font to 10px and define all your units in rem. 1rem = 10px */
 }
 
 body {
-  background-color: #222222;
+  background-color: white;
   font-size: 1.4rem;
   font-family: Arial,Helvetica,sans-serif;
   margin: 0;
@@ -31,14 +29,14 @@ body {
 
 
 .appbox{
-  color: white;
+  color: black;
   font-family: sans-serif;
   font-size: 1rem;
   text-align: center;
   margin: 0.3rem;
   height: 8rem;
   width: 8rem;
-  background-color: #222222;
+  background-color: white;
   border-radius: 0.6rem;  
   display: inline-block;
 }
